@@ -1,5 +1,3 @@
-
-
 class GameObject {
 	constructor(x, y) {
 		this.x = x;
@@ -11,7 +9,16 @@ class GameObject {
 		this.img = undefined;
   } 
   draw(ctx) {
-		ctx.drawImage(this.img, this.x, this.y, this.width, this.height);
+		ctx.drawImage(
+			this.img,
+			0,
+			0,
+			this.img.width,
+			this.img.height,
+			this.x, 
+			this.y, 
+			this.width, 
+			this.height);
 	}
 }
 
@@ -23,7 +30,7 @@ class Player extends GameObject {
 		this.speed = { x: 0, y: 0 };
   }
 }
-class EnemyShip extends GameObject {
+class Enemy extends GameObject {
 	constructor(x, y) {
 		super(x, y);
 		(this.width = 98), (this.height = 50);
@@ -114,7 +121,7 @@ function createEnemies() {
 	for (let x = START_X; x < STOP_X; x += 98) {
 		for (let y = 0; y < 50 * 5; y += 50) {
 			const enemy = new Enemy(x, y);
-			enemy.img = enemyImg;
+			enemy.img = enemyShipImg;
 			gameObjects.push(enemy);
 		}
 	}
@@ -157,21 +164,38 @@ function initGame() {
 	});
 }
 
+document.addEventListener('DOMContentLoaded', event => {
+	const assetsToLoad = [
+		"./assets/enemyShip.png",
+		"./assets/player.png",
+	];
+	const assets = [];
+	Promise.all(assetsToLoad.map(loadAsset)).then(images => { //once all images are loaded, add them to the available sources array
+		images.forEach(function(img){
+			assets.push(img);
+		});
+	
+		canvas = document.getElementById("canvas");
+		canvas.width = 1000;
+		canvas.height = 1000;
+		ctx = canvas.getContext("2d");
+	
+		playerImg = assets[1];
+		enemyShipImg = assets[0];
 
-window.onload = async () => {
-  canvas = document.getElementById("canvas");
-  ctx = canvas.getContext("2d");
-  playerImg = await loadAsset('assets/player.png');
-  enemyShipImg = await loadAsset('assets/enemyShip.png');
-
-  initGame();
-	let gameLoopId = setInterval(() => {
-		ctx.clearRect(0, 0, canvas.width, canvas.height);
-		ctx.fillStyle = 'black';
-		ctx.fillRect(0, 0, canvas.width, canvas.height);
-		drawGameObjects(ctx);
-	}, 100);
-};
+		initGame();
+		let gameLoopId = setInterval(() => {
+			ctx.clearRect(0, 0, canvas.width, canvas.height);
+			ctx.fillStyle = 'black';
+			ctx.fillRect(0, 0, canvas.width, canvas.height);
+			
+			gameObjects.forEach( (element) => {
+				element.draw(ctx);
+			});
+		}, 100);
+		//what to do after images are loaded
+	});
+});
 
 
 
